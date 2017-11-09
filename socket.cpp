@@ -21,6 +21,7 @@
 
 #include "global.h"
 #include "socket.h"
+#include <cstring>
 
 int createTcpListenSocket(uint16_t port, const int backlog) {
 

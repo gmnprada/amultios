@@ -91,9 +91,9 @@ int main(){
 #endif
 
 	
-	Midgard = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27312, "Midgard"));
+	//Midgard = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27312, "Midgard"));
 	Asgard = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27313, "Asgard"));
-	//Vanaheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27314, "Vanaheim"));
+	Vanaheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27314, "Vanaheim"));
 	//Alfheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27315, "Alfheim"));
 	//Helheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27316, "Helheim"));
 	
