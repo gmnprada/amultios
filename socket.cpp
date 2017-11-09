@@ -112,7 +112,6 @@ FILE *OpenCFile(const std::string &filename, const char *mode) {
 #endif
 }
 
-
 void sleep_ms(int ms) {
 #ifdef _WIN32
 	Sleep(ms);

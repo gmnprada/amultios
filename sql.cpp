@@ -2,6 +2,11 @@
 #include <sceNetAdhocCtlServer.h>
 #include "sql.h"
 
+#ifdef _WIN32
+#else
+#include <unistd.h>
+#endif
+
 //Global Shared SQL Object Connection
 MYSQL _CON;
 bool connection = false;
@@ -70,7 +75,12 @@ void keepAliveThread() {
 			}
 		}
 		// count every 10 second
+#ifdef _WIN32
 		Sleep(10 * 1000);
+#else
+		usleep(10 * 1000 * 1000);
+#endif
+
 	}
 
 

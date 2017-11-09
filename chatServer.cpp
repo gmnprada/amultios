@@ -21,7 +21,6 @@
 
 #include "chatServer.h"
 #include "socket.h"
-
 //Identified group name on the lobby
 static const db_groupname default_groupname[] = {
 
