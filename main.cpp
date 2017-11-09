@@ -6,6 +6,7 @@
 #include "chatServer.h"
 
 std::thread sqltimer;
+std::thread PPSSPP;
 std::thread Midgard;
 std::thread Asgard;
 std::thread Vanaheim;
@@ -87,12 +88,14 @@ int main(){
 
 #endif
 
-	
-	//Midgard = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27312, "Midgard"));
-	Asgard = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27313, "Asgard"));
-	Vanaheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27314, "Vanaheim"));
-	//Alfheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27315, "Alfheim"));
-	//Helheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27316, "Helheim"));
+	// CTL Server for PPSSPP Emulator Build
+	PPSSPP = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27312, "PPSSPP"));
+	// CTL Server For Amultios Emulator Build
+	Midgard = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27313, "Midgard"));
+	Asgard = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27314, "Asgard"));
+	//Vanaheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27315, "Vanaheim"));
+	//Alfheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27316, "Alfheim"));
+	//Helheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27317, "Helheim"));
 	
 	ChatServer = std::thread(&CHAT_SERVER::Start_Thread, CHAT_SERVER());
 #ifdef _WIN32

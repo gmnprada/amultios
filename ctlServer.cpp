@@ -997,8 +997,16 @@ bool CTL_SERVER::ValidMac(SceNetEtherAddr * mac) {
 }
 
 bool CTL_SERVER::ValidLogin(SceNetAdhocctlLoginPacketC2S * data) {
-	if (data->name.data[0] == 0) return false;
-	return true;
+
+	// amultios mode and ppsspp mode cannot be mixed this should allow only ppsspp build
+	if (_port == 27312) {
+		if (data->name.data[0] == 0) return false;
+		return true;
+	}
+	else {
+		return false;
+	}
+
 }
 
 
@@ -1007,6 +1015,11 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 	char nameval[ADHOCCTL_NICKNAME_LEN + 1];
 	memset(nameval, 0, sizeof(nameval));
 	strncpy(nameval, (char *)data->name.data, ADHOCCTL_NICKNAME_LEN);
+
+	if (_port == 27312) {
+		strcpy(message, "Only Amultios Emulator can play on our server");
+		return false;
+	}
 
 	if (data->name.data[0] == 0 || data->pin[0] == 0) {
 		strcpy(message, "Login Failed NICKNAME or PIN is empty, did you set it on settings?");
@@ -1024,8 +1037,6 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 	}
 
 	bool check = true;
-
-	
 	{
 		std::unique_lock<std::mutex> lock(sql_lock);
 		char nickname[ADHOCCTL_NICKNAME_LEN + 100];
