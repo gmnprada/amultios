@@ -1,0 +1,3 @@
+D:/github/amultios/amultios/windows/CMakeFiles/amultios.dir
+D:/github/amultios/amultios/windows/CMakeFiles/ALL_BUILD.dir
+D:/github/amultios/amultios/windows/CMakeFiles/ZERO_CHECK.dir
