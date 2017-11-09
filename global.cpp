@@ -2,7 +2,6 @@
 
 std::mutex g_mutex;
 bool g_amultios;
-std::condition_variable g_cond;
 
 
 //TO DO Integrate PPSSPP Log Manager
