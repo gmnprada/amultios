@@ -1,6 +1,6 @@
 #include <signal.h>
-#ifdef _WIN32
 #include <stdlib.h>
+#ifdef _WIN32
 #include <WS2tcpip.h>
 #endif
 #include "chatServer.h"
@@ -43,9 +43,6 @@ void interrupt(int sig) {
 	}
 }
 #endif // _WIN32
-
-
-
 
 int main(){
 
