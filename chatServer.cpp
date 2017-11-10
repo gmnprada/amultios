@@ -1045,7 +1045,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 
 				printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), online, onlinevalidation);
-				printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%d]\n", _serverName.c_str(), atoi(row[2]), int(role));
+				printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), role);
 			}
 
 			mysql_free_result(result);
