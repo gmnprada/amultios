@@ -794,7 +794,7 @@ void CTL_SERVER::LoginAmultiosUser(SceNetAdhocctlUserNode * user, SceNetAdhocctl
 				char update[100 + ADHOCCTL_NICKNAME_LEN];
 				snprintf(update, sizeof(update), "UPDATE users SET online = '1', server='%s' WHERE nickname='%s';", _serverName.c_str(),(char *)user->resolver.name.data);
 				if (mysql_query(&_CON, update)) {
-					fprintf(stderr, "CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %s\n", _serverName.c_str(), update, mysql_errno(&_CON));
+					printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
 					strcpy(message, "Login Failed Lost Connection to database report to admin");
 				}
 			}
@@ -888,7 +888,7 @@ void CTL_SERVER::SendGroupMessage(SceNetAdhocctlUserNode * user,char * message) 
 			char safegroupstr[9];
 			memset(safegroupstr, 0, sizeof(safegroupstr));
 			strncpy(safegroupstr, (char *)user->group->group.data, ADHOCCTL_GROUPNAME_LEN);
-			printf("CTL_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) sent \"%s\" to %d players in %s group %s",_serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], message, counter, safegamestr, safegroupstr);
+			printf("CTL_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) sent \"%s\" to %d players in %s group %s\n",_serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], message, counter, safegamestr, safegroupstr);
 		}
 
 		// Exit Function
@@ -903,7 +903,7 @@ void CTL_SERVER::SendGroupMessage(SceNetAdhocctlUserNode * user,char * message) 
 		char safegamestr[10];
 		memset(safegamestr, 0, sizeof(safegamestr));
 		strncpy(safegamestr, user->game->game.data, PRODUCT_CODE_LENGTH);
-		printf("CTL_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) attempted to send a text message without joining a %s group first", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr);
+		printf("CTL_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) attempted to send a text message without joining a %s group first\n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr);
 	}
 
 }
@@ -943,7 +943,7 @@ void CTL_SERVER::LogoutUser(SceNetAdhocctlUserNode * user) {
 			char update[100 + ADHOCCTL_NICKNAME_LEN];
 			snprintf(update, sizeof(update), "UPDATE users SET online = 0, server=NULL WHERE nickname='%s';", (char *)user->resolver.name.data);
 			if (mysql_query(&_CON, update)) {
-				fprintf(stderr, "CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %s\n", _serverName.c_str(), update, mysql_errno(&_CON));
+				printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
 			}
 		}
 
@@ -1044,7 +1044,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 		snprintf(nickname, sizeof(nickname), "SELECT pin,online,role FROM users WHERE nickname='%s' LIMIT 1;", nameval);
 
 		if (mysql_query(&_CON, nickname)) {
-			fprintf(stderr, "CTL_SERVER [%s][ERROR]Failed To select nickname on database Query[%s] id  Error: %s\n", _serverName.c_str(), nickname, mysql_errno(&_CON));
+			printf("CTL_SERVER [%s][ERROR]Failed To select nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), nickname, mysql_errno(&_CON));
 			strcpy(message, "Login Failed Lost Connection to database report to admin");
 			check = false;
 		}
@@ -1082,7 +1082,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 				}
 				else {
 					strcpy(pinvalidaton, "pin invalid");
-					message = "Invalid PIN , did you set your pin in settings?";
+					strcpy(message,"Invalid PIN , did you set your pin in settings?";
 					check = false;
 				}
 
@@ -1097,7 +1097,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 
 				printf("CTL_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				printf("CTL_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), online, onlinevalidation);
-				printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), role);
+				printf("CTL_SERVER [%s] Validate role db=[%d] role=[%d]\n", _serverName.c_str(), atoi(row[2]), role);
 			}
 
 			mysql_free_result(result);
@@ -1721,7 +1721,7 @@ void CTL_SERVER::UpdateServerStatus(void) {
 		gamecontent = gamecontent.substr(0, gamecontent.size() - 1);
 
 		//print the game content loop content
-		fprintf(log, gamecontent.c_str());
+		fprintf(log,"%s",gamecontent.c_str());
 
 		//close game array
 		fprintf(log, "\n\t  ]\n");
