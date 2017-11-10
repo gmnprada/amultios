@@ -1082,7 +1082,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 				}
 				else {
 					strcpy(pinvalidaton, "pin invalid");
-					strcpy(message,"Invalid PIN , did you set your pin in settings?";
+					strcpy(message,"Invalid PIN , did you set your pin in settings?");
 					check = false;
 				}
 
@@ -1097,7 +1097,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 
 				printf("CTL_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				printf("CTL_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), online, onlinevalidation);
-				printf("CTL_SERVER [%s] Validate role db=[%d] role=[%d]\n", _serverName.c_str(), atoi(row[2]), role);
+				printf("CTL_SERVER [%s] Validate role db=[%d] role=[%d]\n", _serverName.c_str(), atoi(row[2]), int(role));
 			}
 
 			mysql_free_result(result);

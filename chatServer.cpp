@@ -1036,7 +1036,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				}
 				else {
 					strcpy(pinvalidaton, "pin invalid");
-					message = "Invalid PIN , did you set your pin in settings?";
+					strcpy(message,"Invalid PIN , did you set your pin in settings?");
 					check = false;
 				}
 
@@ -1045,7 +1045,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 
 				printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), online, onlinevalidation);
-				printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), role);
+				printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%d]\n", _serverName.c_str(), atoi(row[2]), int(role));
 			}
 
 			mysql_free_result(result);
@@ -1522,7 +1522,7 @@ void CHAT_SERVER::UpdateServerStatus(void) {
 		gamecontent = gamecontent.substr(0, gamecontent.size() - 1);
 
 		//print the game content loop content
-		fprintf(log, gamecontent.c_str());
+		fprintf(log,"%s", gamecontent.c_str());
 
 		//close game array
 		fprintf(log, "\n\t  ]\n");
