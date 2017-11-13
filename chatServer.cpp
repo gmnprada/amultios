@@ -1068,7 +1068,6 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 
 				memset(safepin, 0, sizeof(safepin));
 				memset(safepindb, 0, sizeof(safepindb));
-				int online = atoi(row[1]);
 
 				if (atoi(row[2]) > 2) {
 					check = false;
@@ -1088,7 +1087,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 					check = false;
 				}
 
-				if (online == 1) {
+				if (atoi(row[1]) == 1) {
 					strcpy(onlinevalidation, "Login Failed");
 					strcpy(message, "Login Failed Someone Already Joined with this nickname");
 					check = false;
@@ -1097,7 +1096,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 					strcpy(onlinevalidation, "Login Success");
 				}
 				printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
-				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), online, onlinevalidation);
+				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(row[1]), onlinevalidation);
 				printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), role);
 			}
 

@@ -1067,7 +1067,6 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 
 				memset(safepin, 0, sizeof(safepin));
 				memset(safepindb, 0, sizeof(safepindb));
-				int online = atoi(row[1]);
 
 				if (atoi(row[2]) > 2) {
 					check = false;
@@ -1087,7 +1086,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 					check = false;
 				}
 
-				if (online == 2) {
+				if (atoi(row[1]) == 2) {
 					strcpy(onlinevalidation, "Failed already Joined another Lobby");
 					strcpy(message, "Join Lobby Failed Someone Already Joined with this nickname");
 					check = false;
@@ -1097,7 +1096,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 				}
 
 				printf("CTL_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
-				printf("CTL_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), online, onlinevalidation);
+				printf("CTL_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(row[1]), onlinevalidation);
 				printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), role);
 			}
 
