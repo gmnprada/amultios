@@ -21,9 +21,5 @@
 *.json
 Debug
 Release
-windows/.vs
-windows/Win32
-windows/ipch
-windows/bin-release
-windows/win-version.h
+windows/*
 amultios.dir

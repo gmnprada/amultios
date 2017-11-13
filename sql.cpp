@@ -38,6 +38,7 @@ void connectSQL() {
 
 
 void closeSQL() {
+	mysql_query(&_CON, "update users set online = 0 , server = null where 1;");
 	mysql_close(&_CON);
 	connection = false;
 }

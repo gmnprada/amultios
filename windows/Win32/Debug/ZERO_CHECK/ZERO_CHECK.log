@@ -1,9 +1,0 @@
-﻿  Checking Build System
-  CMake is re-running because D:/github/amultios/amultios/windows/CMakeFiles/generate.stamp is out-of-date.
-    the file 'D:/github/amultios/amultios/cmake/Modules/FindMySQL.cmake'
-    is newer than 'D:/github/amultios/amultios/windows/CMakeFiles/generate.stamp.depend'
-    result='-1'
-  -- Could NOT find MYSQL (missing: REQUIRED_VARS VERSION_VAR MYSQL_VERSION_STRING) 
-  -- Configuring done
-  -- Generating done
-  -- Build files have been written to: D:/github/amultios/amultios/windows

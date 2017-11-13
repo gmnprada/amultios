@@ -28,13 +28,13 @@ FILE *OpenCFile(const std::string &filename, const char *mode);
 
 class CTL_SERVER {
 	public:
-		CTL_SERVER(int, std::string);
+		CTL_SERVER(int, std::string,bool ppsspp);
 		int Start_Thread(void);
 		void Stop_Thread(void);
 		virtual ~CTL_SERVER();
 	private:
 		int _port = 27312;
-
+		bool _enablePPSSPP = false;
 		bool _serverRunning = false;
 		std::string _serverName;
 		SceNetAdhocctlUserNode * _DbUser;

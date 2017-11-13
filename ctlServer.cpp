@@ -141,12 +141,13 @@ static const db_groupname default_groupname[] = {
 
 };
 
-CTL_SERVER::CTL_SERVER(int port, std::string name) {
+CTL_SERVER::CTL_SERVER(int port, std::string name,bool ppsspp) {
 	CTL_SERVER::_port = port;
 	CTL_SERVER::_serverName = name;
 	CTL_SERVER::_DbUser = NULL;
 	CTL_SERVER::_DbGame = NULL;
 	CTL_SERVER::_DbUserCount = 0;
+	CTL_SERVER::_enablePPSSPP = ppsspp;
 }
 
 
@@ -792,7 +793,7 @@ void CTL_SERVER::LoginAmultiosUser(SceNetAdhocctlUserNode * user, SceNetAdhocctl
 			{
 				std::unique_lock<std::mutex> lock(sql_lock);
 				char update[100 + ADHOCCTL_NICKNAME_LEN];
-				snprintf(update, sizeof(update), "UPDATE users SET online = '1', server='%s' WHERE nickname='%s';", _serverName.c_str(),(char *)user->resolver.name.data);
+				snprintf(update, sizeof(update), "UPDATE users SET online = '2', server='%s' WHERE nickname='%s';", _serverName.c_str(),(char *)user->resolver.name.data);
 				if (mysql_query(&_CON, update)) {
 					printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
 					strcpy(message, "Login Failed Lost Connection to database report to admin");
@@ -941,7 +942,7 @@ void CTL_SERVER::LogoutUser(SceNetAdhocctlUserNode * user) {
 		{
 			std::unique_lock<std::mutex> lock(sql_lock);
 			char update[100 + ADHOCCTL_NICKNAME_LEN];
-			snprintf(update, sizeof(update), "UPDATE users SET online = 0, server=NULL WHERE nickname='%s';", (char *)user->resolver.name.data);
+			snprintf(update, sizeof(update), "UPDATE users SET online = 1, server='Chat' WHERE nickname='%s';", (char *)user->resolver.name.data);
 			if (mysql_query(&_CON, update)) {
 				printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
 			}
@@ -999,7 +1000,7 @@ bool CTL_SERVER::ValidMac(SceNetEtherAddr * mac) {
 bool CTL_SERVER::ValidLogin(SceNetAdhocctlLoginPacketC2S * data) {
 
 	// amultios mode and ppsspp mode cannot be mixed this should allow only ppsspp build
-	if (_port == 27312) {
+	if (_enablePPSSPP) {
 		if (data->name.data[0] == 0) return false;
 		return true;
 	}
@@ -1082,18 +1083,18 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 				}
 				else {
 					strcpy(pinvalidaton, "pin invalid");
-					strcpy(message,"Invalid PIN , did you set your pin in settings?");
+					strcpy(message,"Invalid PIN , did you set your pin in network settings?");
 					check = false;
 				}
 
-				//if (online == 1) {
-					//strcpy(onlinevalidation, "Failed already logged in");
-					//strcpy(message, "Login Failed Someone Already Login With this Nickname");
-					//check = false;
-				//}
-				//else {
-					strcpy(onlinevalidation, "Login Success");
-				//}
+				if (online == 2) {
+					strcpy(onlinevalidation, "Failed already Joined another Lobby");
+					strcpy(message, "Join Lobby Failed Someone Already Joined with this nickname");
+					check = false;
+				}
+				else {
+					strcpy(onlinevalidation, "Join Lobby Success");
+				}
 
 				printf("CTL_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				printf("CTL_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), online, onlinevalidation);

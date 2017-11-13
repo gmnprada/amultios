@@ -712,6 +712,16 @@ void CHAT_SERVER::LoginChatUser(ChatUserNode * user, ChatLoginPacketC2S * data) 
 		// Set Chat Message
 		strcpy(packet.reason, "Login Success");
 		int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
+		// Update online status on mysql DB
+		{
+			std::unique_lock<std::mutex> lock(sql_lock);
+			char update[100 + ADHOCCTL_NICKNAME_LEN];
+			snprintf(update, sizeof(update), "UPDATE users SET online = '1', server='%s' WHERE nickname='%s';", _serverName.c_str(), (char *)user->resolver.name.data);
+			if (mysql_query(&_CON, update)) {
+				printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
+				strcpy(message, "Login Failed Lost Connection to database report to admin");
+			}
+		}
 		if (iResult < 0) printf("CHAT_SERVER [%s][ERROR] send sucess packet  (Socket error %d) \n", _serverName.c_str(), errno);
 		return;
 	}
@@ -901,6 +911,15 @@ void CHAT_SERVER::LogoutUser(ChatUserNode * user) {
 
 	// Close Stream
 	closesocket(user->stream);
+	
+	{
+		std::unique_lock<std::mutex> lock(sql_lock);
+		char update[100 + ADHOCCTL_NICKNAME_LEN];
+		snprintf(update, sizeof(update), "UPDATE users SET online = 0, server=NULL WHERE nickname='%s';", (char *)user->resolver.name.data);
+		if (mysql_query(&_CON, update)) {
+			printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
+		}
+	}
 
 	// Playing User
 	if (user->game != NULL)
@@ -974,17 +993,17 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 	strncpy(nameval, (char *)data->name.data, ADHOCCTL_NICKNAME_LEN);
 
 	if (data->name.data[0] == 0 || data->pin[0] == 0) {
-		strcpy(message, "Login Failed NICKNAME or PIN is empty, did you set it on settings?");
+		strcpy(message, "Login Failed NICKNAME or PIN is empty, set crendential nickname on network settings");
 		return false;
 	}
 
 	if (strcmp(nameval, "PPSSPP") == 0) {
-		strcpy(message, "Login Failed using default PPSSPP name, did you set it on settings?");
+		strcpy(message, "Login Failed using default PPSSPP name, set crendential nickname on network settings");
 		return false;
 	}
 
 	if (strcmp(nameval, "AMULTIOS") == 0) {
-		strcpy(message, "Login Failed using default AMULTIOS name, did you set it on settings?");
+		strcpy(message, "Login Failed using default AMULTIOS name, set crendential nickname on network settings");
 		return false;
 	}
 
@@ -1008,7 +1027,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 
 			if (row == NULL) {
 				printf("CHAT_SERVER [%s] Failed login attemp nickname not found %s \n", _serverName.c_str(), nameval);
-				strcpy(message, "Login Failed Nickname Not Found did you already register?");
+				strcpy(message, "Login Failed Nickname Not Found did you already register on amultios.net?");
 				check = false;
 			}
 			else {
@@ -1036,13 +1055,18 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				}
 				else {
 					strcpy(pinvalidaton, "pin invalid");
-					strcpy(message,"Invalid PIN , did you set your pin in settings?");
+					strcpy(message,"Invalid PIN , did you set your pin in network settings?");
 					check = false;
 				}
 
-				strcpy(onlinevalidation, "Login Success");
-				
-
+				if (online == 1) {
+					strcpy(onlinevalidation, "Login Failed");
+					strcpy(message, "Login Failed Someone Already Joined with this nickname");
+					check = false;
+				}
+				else {
+					strcpy(onlinevalidation, "Login Success");
+				}
 				printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), online, onlinevalidation);
 				printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), role);
