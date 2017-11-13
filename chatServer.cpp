@@ -902,10 +902,11 @@ void CHAT_SERVER::SendGlobalMessage(ChatUserNode * user, char * message) {
 	// Set Chat Opcode
 	packet.name = packet.name = user->resolver.name;
 	packet.base.base.opcode = OPCODE_GLOBAL_CHAT;
-	ChatUserNode * peer = user;
+	ChatUserNode * peer = _DbUser;
 	strcpy(packet.base.message, message);
 	while (peer != NULL)
 	{
+		printf("found peer name global chat %s\n", peer->resolver.name);
 		// Send Data
 		if (peer == user)
 		{
