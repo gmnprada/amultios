@@ -1059,7 +1059,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				strcpy(message, "Login Failed Nickname Not Found did you already register on amultios.net?");
 				check = false;
 			}
-			else {
+			else if(result){
 
 				char pinvalidaton[30];
 				char onlinevalidation[30];
@@ -1098,6 +1098,10 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(row[1]), onlinevalidation);
 				printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), role);
+			}
+			else {
+				strcpy(message, "Server Still busy retry Login again later");
+				check = false;
 			}
 
 			mysql_free_result(result);
