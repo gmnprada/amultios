@@ -33,6 +33,7 @@ void connectSQL() {
 	else {
 		printf("MYSQL_SERVER [%s] : Connected to Database\n",DB_HOST);
 		connection = true;
+		mysql_query(&_CON, "update users set online = 0 , server = null where 1;");
 	}
 }
 
