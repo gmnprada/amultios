@@ -893,19 +893,20 @@ void CHAT_SERVER::SendGroupMessage(ChatUserNode * user, char * message) {
 void CHAT_SERVER::SendGlobalMessage(ChatUserNode * user, char * message) {
 	uint8_t * ip = (uint8_t *)&user->resolver.ip;
 	printf("CHAT_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) sent global chat %s \n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], message);
-	// Chat Packet
-	SceNetAdhocctlChatPacketS2C packet;
 
-	// Clear Memory
-	memset(&packet, 0, sizeof(packet));
-
-	// Set Chat Opcode
-	packet.name = packet.name = user->resolver.name;
-	packet.base.base.opcode = OPCODE_GLOBAL_CHAT;
 	ChatUserNode * peer = _DbUser;
-	strcpy(packet.base.message, message);
 	while (peer != NULL)
 	{
+		// Chat Packet
+		SceNetAdhocctlChatPacketS2C packet;
+
+		// Clear Memory
+		memset(&packet, 0, sizeof(packet));
+
+		// Set Chat Opcode
+		packet.name = packet.name = user->resolver.name;
+		packet.base.base.opcode = OPCODE_GLOBAL_CHAT;
+		strcpy(packet.base.message, message);
 		printf("found peer name global chat %s\n", peer->resolver.name);
 		// Send Data
 		if (peer == user)
