@@ -1294,7 +1294,7 @@ void CHAT_SERVER::DisconnectUserGroup(ChatUserNode * user) {
 	{
 		// Notify User
 		uint8_t * ip = (uint8_t *)&user->resolver.ip;
-		printf("CHAT_SERVER [%s][%s] %s attempted to leave %s group without joining one first\n", _serverName.c_str(), user->server);
+		printf("CHAT_SERVER [%s][%s] %s attempted to leave group without joining one first\n", _serverName.c_str(), user->server, (char *)user->resolver.name.data);
 	}
 
 	// Delete User
