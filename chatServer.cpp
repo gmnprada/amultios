@@ -915,7 +915,7 @@ void CHAT_SERVER::SendGlobalMessage(ChatUserNode * user, char * message) {
 			// Continue Loop
 			continue;
 		}
-		int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
+		int iResult = send(peer->stream, (const char*)&packet, sizeof(packet), 0);
 		if (iResult < 0) printf("AdhocServer: spread_message[send chat failed for user] (Socket error %d)", errno);
 		peer = peer->next;
 	}
