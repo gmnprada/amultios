@@ -893,21 +893,28 @@ void CHAT_SERVER::SendGroupMessage(ChatUserNode * user, char * message) {
 void CHAT_SERVER::SendGlobalMessage(ChatUserNode * user, char * message) {
 	uint8_t * ip = (uint8_t *)&user->resolver.ip;
 	printf("CHAT_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) sent global chat %s \n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], message);
-	for (user = _DbUser; user != NULL; user = user->next)
+	// Chat Packet
+	SceNetAdhocctlChatPacketS2C packet;
+
+	// Clear Memory
+	memset(&packet, 0, sizeof(packet));
+
+	// Set Chat Opcode
+	packet.name = packet.name = user->resolver.name;
+	packet.base.base.opcode = OPCODE_GLOBAL_CHAT;
+	ChatUserNode * peer = _DbUser;
+	strcpy(packet.base.message, message);
+	for (peer = _DbUser; peer != NULL; peer = peer->next)
 	{
-		// Chat Packet
-		SceNetAdhocctlChatPacketS2C packet;
-
-		// Clear Memory
-		memset(&packet, 0, sizeof(packet));
-
-		// Set Chat Opcode
-		packet.base.base.opcode = OPCODE_GLOBAL_CHAT;
-
-		// Set Chat Message
-		strcpy(packet.base.message, message);
-
 		// Send Data
+		if (peer == user)
+		{
+			// Move Pointer
+			peer = peer->next;
+
+			// Continue Loop
+			continue;
+		}
 		int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
 		if (iResult < 0) printf("AdhocServer: spread_message[send chat failed for user] (Socket error %d)", errno);
 	}
