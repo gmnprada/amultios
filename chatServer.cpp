@@ -691,7 +691,7 @@ void CHAT_SERVER::FreeDbUser(void)
 void CHAT_SERVER::LoginChatUser(ChatUserNode * user, ChatLoginPacketC2S * data) {
 
 	char message[64];
-	if (ValidMac(&data->mac) && ValidAmultiosLogin(data, message, &user->role)) {
+	if (ValidMac(&data->mac) && ValidAmultiosLogin(data, message, user)) {
 
 		// Save MAC
 		user->resolver.mac = data->mac;
@@ -1015,7 +1015,7 @@ bool CHAT_SERVER::ValidLogin(SceNetAdhocctlLoginPacketC2S * data) {
 }
 
 
-bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, uint8_t * role) {
+bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, ChatUserNode * user) {
 
 	char nameval[ADHOCCTL_NICKNAME_LEN + 1];
 	memset(nameval, 0, sizeof(nameval));
@@ -1074,7 +1074,13 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 					strcpy(message, "Your Account got Banned Stop Cheating Noob!");
 				}
 
-				role = (uint8_t *)atoi(row[2]);
+				if (user != NULL) {
+					user->role = atoi(row[2]);
+				}
+				else {
+					user->role = 1;
+				}
+
 				strncpy(safepin, data->pin, PIN_LENGTH);
 				strncpy(safepindb, row[0], PIN_LENGTH);
 
@@ -1097,7 +1103,9 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				}
 				printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(row[1]), onlinevalidation);
-				printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), role);
+				if (user != NULL) {
+					printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), user->role);
+				}
 			}
 			else {
 				strcpy(message, "Server Still busy retry Login again later");

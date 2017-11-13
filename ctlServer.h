@@ -64,7 +64,7 @@ class CTL_SERVER {
 		void SendGroupMessage(SceNetAdhocctlUserNode * user,char * message);
 		bool ValidMac(SceNetEtherAddr * mac);
 		bool ValidLogin(SceNetAdhocctlLoginPacketC2S * data);
-		bool ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data, char * message, uint8_t * role);
+		bool ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data, char * message, SceNetAdhocctlUserNode * user);
 		void LogoutUser(SceNetAdhocctlUserNode * user);
 
 		// User Adhoc Group Manipulation

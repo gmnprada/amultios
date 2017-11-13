@@ -727,7 +727,7 @@ void CTL_SERVER::LoginUser(SceNetAdhocctlUserNode * user, SceNetAdhocctlLoginPac
 void CTL_SERVER::LoginAmultiosUser(SceNetAdhocctlUserNode * user, SceNetAdhocctlLoginPacketAmultiosC2S * data) {
 
 	char message[64];
-	if (ValidGameProduct(&data->game) && ValidMac(&data->mac) && ValidAmultiosLogin(data, message, &user->role)) {
+	if (ValidGameProduct(&data->game) && ValidMac(&data->mac) && ValidAmultiosLogin(data, message, user)) {
 
 		// Game Product Override
 		GameProductLink(&data->game);
@@ -1011,7 +1011,7 @@ bool CTL_SERVER::ValidLogin(SceNetAdhocctlLoginPacketC2S * data) {
 }
 
 
-bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data, char * message, uint8_t * role) {
+bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data, char * message, SceNetAdhocctlUserNode * user) {
 
 	char nameval[ADHOCCTL_NICKNAME_LEN + 1];
 	memset(nameval, 0, sizeof(nameval));
@@ -1073,7 +1073,12 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 					strcpy(message, "Your Account got Banned Stop Cheating Noob!");
 				}
 
-				role = (uint8_t *)atoi(row[2]);
+				if (user != NULL) {
+					user->role = atoi(row[2]);
+				}
+				else {
+					user->role = 1;
+				}
 				strncpy(safepin, data->pin, PIN_LENGTH);
 				strncpy(safepindb, row[0], PIN_LENGTH);
 
@@ -1097,7 +1102,10 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 
 				printf("CTL_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				printf("CTL_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(row[1]), onlinevalidation);
-				printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), role);
+				if (user != NULL) {
+					printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), user->role);
+				}
+
 			}
 			else {
 				strcpy(message, "Server Still busy retry Login again later");

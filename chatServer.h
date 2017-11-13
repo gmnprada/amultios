@@ -193,7 +193,7 @@ class CHAT_SERVER {
 		void SendGlobalMessage(ChatUserNode * user, char * message);
 		bool ValidMac(SceNetEtherAddr * mac);
 		bool ValidLogin(SceNetAdhocctlLoginPacketC2S * data);
-		bool ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, uint8_t * role);
+		bool ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, ChatUserNode * user);
 		void LogoutUser(ChatUserNode * user);
 
 		// User Adhoc Group Manipulation
