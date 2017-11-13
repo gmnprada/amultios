@@ -902,9 +902,9 @@ void CHAT_SERVER::SendGlobalMessage(ChatUserNode * user, char * message) {
 	// Set Chat Opcode
 	packet.name = packet.name = user->resolver.name;
 	packet.base.base.opcode = OPCODE_GLOBAL_CHAT;
-	ChatUserNode * peer = _DbUser;
+	ChatUserNode * peer = user;
 	strcpy(packet.base.message, message);
-	for (peer = _DbUser; peer != NULL; peer = peer->next)
+	while (peer != NULL)
 	{
 		// Send Data
 		if (peer == user)
@@ -917,6 +917,7 @@ void CHAT_SERVER::SendGlobalMessage(ChatUserNode * user, char * message) {
 		}
 		int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
 		if (iResult < 0) printf("AdhocServer: spread_message[send chat failed for user] (Socket error %d)", errno);
+		peer = peer->next;
 	}
 
 }
