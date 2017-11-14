@@ -1224,8 +1224,8 @@ void CHAT_SERVER::ConnectUserGroup(ChatUserNode * user, ChatGroupName * group) {
 				memset(safegroupstr2, 0, sizeof(safegroupstr2));
 				strncpy(safegroupstr2, (char *)user->group->group.data, CHAT_GROUPNAME_LENGTH);
 				printf("CTL_Server[%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) attempted to join %s group %s without disconnecting from %s first\n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr, safegroupstr, safegroupstr2);
-				if (user->group != NULL) DisconnectUserGroup(user);
-				return;
+				//if (user->group != NULL) DisconnectUserGroup(user);
+				//return;
 			}
 		}
 	}
