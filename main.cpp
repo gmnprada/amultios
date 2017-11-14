@@ -89,11 +89,11 @@ int main(){
 #endif
 
 	// CTL Server for PPSSPP Emulator Build
-	PPSSPP = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27312, "PPSSPP",true));
+	//PPSSPP = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27312, "PPSSPP",true));
 	// CTL Server For Amultios Emulator Build
 	Midgard = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27313, "Midgard",false));
 	Asgard = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27314, "Asgard",false));
-	//Vanaheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27315, "Vanaheim"));
+	Vanaheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27315, "Vanaheim"));
 	//Alfheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27316, "Alfheim"));
 	//Helheim = std::thread(&CTL_SERVER::Start_Thread, CTL_SERVER(27317, "Helheim"));
 	
