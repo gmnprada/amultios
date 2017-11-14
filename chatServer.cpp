@@ -1071,45 +1071,50 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				memset(onlineChar, 0, sizeof(int));
 				memset(roleChar, 0, sizeof(int));
 
-				strncpy(onlineChar, row[1], sizeof(int));
-				strncpy(roleChar, row[2], sizeof(int));
-
-				if (atoi(onlineChar) > 2) {
-					check = false;
-					strcpy(message, "Your Account got Banned Stop Cheating Noob!");
+				if (row[0] != NULL && row[0][0] != '\0') {
+					strncpy(safepin, data->pin, PIN_LENGTH);
+					strncpy(safepindb, row[0], PIN_LENGTH);
+					if (IsMatch(safepin, safepindb)) {
+						strcpy(pinvalidaton, "pin valid");
+					}
+					else {
+						strcpy(pinvalidaton, "pin invalid");
+						strcpy(message, "Invalid PIN , did you set your pin in network settings?");
+						check = false;
+					}
+					printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				}
 
-				if (user != NULL) {
+				if(row[1] != NULL && row[1][0] != '\0'){
+					strncpy(onlineChar, row[1], sizeof(int));
+
+					if (atoi(onlineChar) == 1) {
+						strcpy(onlinevalidation, "Login Failed");
+						strcpy(message, "Login Failed Someone Already Joined with this nickname");
+						check = false;
+					}
+					else {
+						strcpy(onlinevalidation, "Login Success");
+					}
+
+					printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(onlineChar), onlinevalidation);
+				}
+				else {
+					strcpy(message, "Server Still busy retry Login again later");
+					check = false;
+				}
+
+				if (user != NULL && row[2] != NULL && row[2][0] != '\0') {
 					user->role = atoi(roleChar);
-				}
-				else {
-					user->role = 1;
-				}
-
-				strncpy(safepin, data->pin, PIN_LENGTH);
-				strncpy(safepindb, row[0], PIN_LENGTH);
-
-				if (IsMatch(safepin, safepindb)) {
-					strcpy(pinvalidaton, "pin valid");
-				}
-				else {
-					strcpy(pinvalidaton, "pin invalid");
-					strcpy(message,"Invalid PIN , did you set your pin in network settings?");
-					check = false;
-				}
-
-				if (atoi(roleChar) == 1) {
-					strcpy(onlinevalidation, "Login Failed");
-					strcpy(message, "Login Failed Someone Already Joined with this nickname");
-					check = false;
-				}
-				else {
-					strcpy(onlinevalidation, "Login Success");
-				}
-				printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
-				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(onlineChar), onlinevalidation);
-				if (user != NULL) {
+					if (atoi(roleChar) > 2) {
+						check = false;
+						strcpy(message, "Your Account got Banned Stop Cheating Noob!");
+					}
 					printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(roleChar), user->role);
+				}
+				else {
+					strcpy(message, "Server Still busy retry Login again later");
+					check = false;
 				}
 			}
 			else {
