@@ -1058,7 +1058,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 				strcpy(message, "Login Failed Nickname Not Found did you already register?");
 				check = false;
 			}
-			else if(result && row !=NULL) {
+			else if(result!=NULL && row !=NULL) {
 
 				char pinvalidaton[30];
 				char onlinevalidation[30];

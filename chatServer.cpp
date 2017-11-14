@@ -1037,8 +1037,6 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 	}
 
 	bool check = true;
-
-
 	{
 		std::unique_lock<std::mutex> lock(sql_lock);
 		char nickname[ADHOCCTL_NICKNAME_LEN + 100];
@@ -1059,7 +1057,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				strcpy(message, "Login Failed Nickname Not Found did you already register on amultios.net?");
 				check = false;
 			}
-			else if(result && row != NULL){
+			else if(result!=NULL && row != NULL){
 
 				char pinvalidaton[30];
 				char onlinevalidation[30];
