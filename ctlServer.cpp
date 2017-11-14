@@ -727,7 +727,7 @@ void CTL_SERVER::LoginUser(SceNetAdhocctlUserNode * user, SceNetAdhocctlLoginPac
 void CTL_SERVER::LoginAmultiosUser(SceNetAdhocctlUserNode * user, SceNetAdhocctlLoginPacketAmultiosC2S * data) {
 
 	char message[64];
-	if (ValidGameProduct(&data->game) && ValidMac(&data->mac) && ValidAmultiosLogin(data, message, user)) {
+	if (ValidGameProduct(&data->game) && ValidMac(&data->mac) && ValidAmultiosLogin(data, message,user)) {
 
 		// Game Product Override
 		GameProductLink(&data->game);
@@ -1058,23 +1058,30 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 				strcpy(message, "Login Failed Nickname Not Found did you already register?");
 				check = false;
 			}
-			else if(result) {
+			else if(result && row !=NULL) {
 
 				char pinvalidaton[30];
 				char onlinevalidation[30];
 				char safepin[7];
 				char safepindb[7];
+				char onlineChar[sizeof(int) + 1];
+				char roleChar[sizeof(int) + 1];
 
+				memset(onlineChar, 0, sizeof(int));
+				memset(roleChar, 0, sizeof(int));
 				memset(safepin, 0, sizeof(safepin));
 				memset(safepindb, 0, sizeof(safepindb));
 
-				if (atoi(row[2]) > 2) {
+				strncpy(onlineChar, row[1], sizeof(int));
+				strncpy(roleChar, row[2], sizeof(int));
+
+				if (atoi(roleChar) > 2) {
 					check = false;
 					strcpy(message, "Your Account got Banned Stop Cheating Noob!");
 				}
 
 				if (user != NULL) {
-					user->role = atoi(row[2]);
+					user->role = atoi(roleChar);
 				}
 				else {
 					user->role = 1;
@@ -1091,7 +1098,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 					check = false;
 				}
 
-				if (atoi(row[1]) == 2) {
+				if (atoi(onlineChar) == 2) {
 					strcpy(onlinevalidation, "Failed already Joined another Lobby");
 					strcpy(message, "Join Lobby Failed Someone Already Joined with this nickname");
 					check = false;
@@ -1101,9 +1108,9 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 				}
 
 				printf("CTL_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
-				printf("CTL_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(row[1]), onlinevalidation);
+				printf("CTL_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(onlineChar), onlinevalidation);
 				if (user != NULL) {
-					printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), user->role);
+					printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(roleChar), user->role);
 				}
 
 			}

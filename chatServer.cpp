@@ -1059,23 +1059,30 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				strcpy(message, "Login Failed Nickname Not Found did you already register on amultios.net?");
 				check = false;
 			}
-			else if(result){
+			else if(result && row != NULL){
 
 				char pinvalidaton[30];
 				char onlinevalidation[30];
 				char safepin[7];
 				char safepindb[7];
+				char onlineChar[sizeof(int)+1];
+				char roleChar[sizeof(int)+1];
 
 				memset(safepin, 0, sizeof(safepin));
 				memset(safepindb, 0, sizeof(safepindb));
+				memset(onlineChar, 0, sizeof(int));
+				memset(roleChar, 0, sizeof(int));
 
-				if (atoi(row[2]) > 2) {
+				strncpy(onlineChar, row[1], sizeof(int));
+				strncpy(roleChar, row[2], sizeof(int));
+
+				if (atoi(onlineChar) > 2) {
 					check = false;
 					strcpy(message, "Your Account got Banned Stop Cheating Noob!");
 				}
 
 				if (user != NULL) {
-					user->role = atoi(row[2]);
+					user->role = atoi(roleChar);
 				}
 				else {
 					user->role = 1;
@@ -1093,7 +1100,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 					check = false;
 				}
 
-				if (atoi(row[1]) == 1) {
+				if (atoi(roleChar) == 1) {
 					strcpy(onlinevalidation, "Login Failed");
 					strcpy(message, "Login Failed Someone Already Joined with this nickname");
 					check = false;
@@ -1102,9 +1109,9 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 					strcpy(onlinevalidation, "Login Success");
 				}
 				printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
-				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(row[1]), onlinevalidation);
+				printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(onlineChar), onlinevalidation);
 				if (user != NULL) {
-					printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(row[2]), user->role);
+					printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(roleChar), user->role);
 				}
 			}
 			else {
