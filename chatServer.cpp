@@ -872,7 +872,7 @@ void CHAT_SERVER::SendGroupMessage(ChatUserNode * user, char * message) {
 			char safegroupstr[CHAT_GROUPNAME_LENGTH+1];
 			memset(safegroupstr, 0, sizeof(safegroupstr));
 			strncpy(safegroupstr, (char *)user->group->group.data, CHAT_GROUPNAME_LENGTH);
-			printf("CHAT_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) sent \"%s\" to %d players in %s group %s", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], message, counter, safegamestr, safegroupstr);
+			printf("CHAT_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) sent \"%s\" to %d players in %s group %s \n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], message, counter, safegamestr, safegroupstr);
 		}
 
 		// Exit Function
@@ -1143,7 +1143,22 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 */
 void CHAT_SERVER::ConnectUserGroup(ChatUserNode * user, ChatGroupName * group) {
 
-	if (ValidGroupName(group) && user->game != NULL) {
+	//probably reconnect script that bugged
+	if (user->game == NULL) {
+		//rejected packet
+		SceNetAdhocctlNotifyPacketS2C packet;
+		// Clear Memory
+		memset(&packet, 0, sizeof(packet));
+		packet.base.opcode = OPCODE_AMULTIOS_LOGIN_FAILED;
+		// Set Chat Message
+		strcpy(packet.reason, "Reconnect Script disabled, restart your game to reconnect");
+		int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
+		if (iResult < 0) printf("CHAT_SERVER [%s][ERROR] send rejected packet  (Socket error %d) \n", _serverName.c_str(), errno);
+		LogoutUser(user);
+		return;
+	}
+
+	if (ValidGroupName(group)) {
 
 		//User is disconnected from group
 		if (user->group == NULL) {
@@ -1224,8 +1239,6 @@ void CHAT_SERVER::ConnectUserGroup(ChatUserNode * user, ChatGroupName * group) {
 				memset(safegroupstr2, 0, sizeof(safegroupstr2));
 				strncpy(safegroupstr2, (char *)user->group->group.data, CHAT_GROUPNAME_LENGTH);
 				printf("CTL_Server[%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) attempted to join %s group %s without disconnecting from %s first\n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr, safegroupstr, safegroupstr2);
-				//if (user->group != NULL) DisconnectUserGroup(user);
-				//return;
 			}
 		}
 	}
