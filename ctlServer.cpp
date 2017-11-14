@@ -942,7 +942,7 @@ void CTL_SERVER::LogoutUser(SceNetAdhocctlUserNode * user) {
 		{
 			std::unique_lock<std::mutex> lock(sql_lock);
 			char update[100 + ADHOCCTL_NICKNAME_LEN];
-			snprintf(update, sizeof(update), "UPDATE users SET online = 1, server='Chat' WHERE nickname='%s';", (char *)user->resolver.name.data);
+			snprintf(update, sizeof(update), "UPDATE users SET online = 1, server='Amultios' WHERE nickname='%s';", (char *)user->resolver.name.data);
 			if (mysql_query(&_CON, update)) {
 				printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
 			}

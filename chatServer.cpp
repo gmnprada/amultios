@@ -710,7 +710,7 @@ void CHAT_SERVER::LoginChatUser(ChatUserNode * user, ChatLoginPacketC2S * data) 
 		memset(&packet, 0, sizeof(packet));
 		packet.base.opcode = OPCODE_AMULTIOS_LOGIN_SUCCESS;
 		// Set Chat Message
-		strcpy(packet.reason, "Login Success");
+		strcpy(packet.reason, message);
 		int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
 		// Update online status on mysql DB
 		{
@@ -1094,11 +1094,12 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 
 					if (atoi(onlineChar) == 1) {
 						strcpy(onlinevalidation, "Login Failed");
-						strcpy(message, "Login Failed Someone Already Joined with this nickname");
-						check = false;
+						strcpy(message, "Double Login Detected try restarting somone may use your account");
+						//check = false;
 					}
 					else {
 						strcpy(onlinevalidation, "Login Success");
+						strcpy(message, "Login Success");
 					}
 
 					printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(onlineChar), onlinevalidation);
