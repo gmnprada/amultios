@@ -1084,6 +1084,10 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 					}
 					printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				}
+				else {
+					strcpy(message, "Server Still busy retry Login again later");
+					check = false;
+				}
 
 				if(row[1] != NULL && row[1][0] != '\0'){
 					strncpy(onlineChar, row[1], sizeof(int));

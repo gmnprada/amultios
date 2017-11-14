@@ -1085,10 +1085,13 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 					}
 					printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
 				}
+				else {
+					strcpy(message, "Server Still busy retry Login again later");
+					check = false;
+				}
 
 				if (row[1] != NULL && row[1][0] != '\0') {
 					strncpy(onlineChar, row[1], sizeof(int));
-
 					if (atoi(onlineChar) == 2) {
 						strcpy(onlinevalidation, "Login Failed");
 						strcpy(message, "Login Failed Someone Already Joined with this nickname");
@@ -1106,6 +1109,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 				}
 
 				if (user != NULL && row[2] != NULL && row[2][0] != '\0') {
+					strncpy(roleChar, row[2], sizeof(int));
 					user->role = atoi(roleChar);
 					if (atoi(roleChar) > 2) {
 						check = false;
