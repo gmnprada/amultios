@@ -1314,7 +1314,7 @@ void CHAT_SERVER::DisconnectUserGroup(ChatUserNode * user) {
 	}
 
 	// Delete User
-	//LogoutUser(user);
+	LogoutUser(user);
 }
 
 
