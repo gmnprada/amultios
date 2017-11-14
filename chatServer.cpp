@@ -946,7 +946,7 @@ void CHAT_SERVER::LogoutUser(ChatUserNode * user) {
 		char update[100 + ADHOCCTL_NICKNAME_LEN];
 		snprintf(update, sizeof(update), "UPDATE users SET online = 0, server=NULL WHERE nickname='%s';", (char *)user->resolver.name.data);
 		if (mysql_query(&_CON, update)) {
-			printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
+			printf("CTL_SERVER [%s][ERROR] %s Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), (char *)user->resolver.name.data, update, mysql_errno(&_CON));
 		}
 	}
 
@@ -1020,6 +1020,30 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 	char nameval[ADHOCCTL_NICKNAME_LEN + 1];
 	memset(nameval, 0, sizeof(nameval));
 	strncpy(nameval, (char *)data->name.data, ADHOCCTL_NICKNAME_LEN);
+
+	bool validName = true;
+	for (int i = 0; i < ADHOCCTL_NICKNAME_LEN; i++) {
+
+		// End of Name
+		if (data->name.data[i] == 0) break;
+
+		// A - Z
+		if (data->name.data[i] == 0 >= 'A' && data->name.data[i] == 0 <= 'Z') continue;
+
+		// a - z
+		if (data->name.data[i] == 0 >= 'a' && data->name.data[i] == 0 <= 'z') continue;
+
+		// 0 - 9
+		if (data->name.data[i] == 0 >= '0' && data->name.data[i] == 0 <= '9') continue;
+
+		// Invalid Symbol
+		validName = false;
+	}
+
+	if (!validName) {
+		strcpy(message, "Login Failed Nickname contain special character");
+		return false;
+	}
 
 	if (data->name.data[0] == 0 || data->pin[0] == 0) {
 		strcpy(message, "Login Failed NICKNAME or PIN is empty, set crendential nickname on network settings");

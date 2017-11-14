@@ -1046,7 +1046,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 
 		if (mysql_query(&_CON, nickname)) {
 			printf("CTL_SERVER [%s][ERROR]Failed To select nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), nickname, mysql_errno(&_CON));
-			strcpy(message, "Login Failed Lost Connection to database report to admin");
+			strcpy(message, "Login Failed Invalid Input Character For Nickname");
 			check = false;
 		}
 		else {
