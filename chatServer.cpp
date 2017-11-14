@@ -1143,7 +1143,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 */
 void CHAT_SERVER::ConnectUserGroup(ChatUserNode * user, ChatGroupName * group) {
 
-	if (ValidGroupName(group)) {
+	if (ValidGroupName(group) && user->game != NULL) {
 
 		//User is disconnected from group
 		if (user->group == NULL) {
@@ -1240,7 +1240,7 @@ void CHAT_SERVER::ConnectUserGroup(ChatUserNode * user, ChatGroupName * group) {
 		char safegroupstr[CHAT_GROUPNAME_LENGTH];
 		memset(safegroupstr, 0, sizeof(safegroupstr));
 		strncpy(safegroupstr, (char *)group->data, CHAT_GROUPNAME_LENGTH);
-		printf("CHAT_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) attempted to join invalid %s group %s\n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr, safegroupstr);
+		printf("CHAT_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) attempted to join invalid %s group %s without joining game first\n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr, safegroupstr);
 	}
 
 	// Invalid State, Out of Memory or Invalid Group Name
