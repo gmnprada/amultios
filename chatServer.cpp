@@ -1105,12 +1105,13 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				}
 
 				if (user != NULL && row[2] != NULL && row[2][0] != '\0') {
+					strncpy(roleChar, row[2], sizeof(int));
 					user->role = atoi(roleChar);
 					if (atoi(roleChar) > 2) {
 						check = false;
 						strcpy(message, "Your Account got Banned Stop Cheating Noob!");
 					}
-					printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(roleChar), user->role);
+					printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(roleChar), user->role);
 				}
 				else {
 					strcpy(message, "Server Still busy retry Login again later");
