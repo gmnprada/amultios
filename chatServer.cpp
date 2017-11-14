@@ -1028,13 +1028,13 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 		if (data->name.data[i] == 0) break;
 
 		// A - Z
-		if (data->name.data[i] == 0 >= 'A' && data->name.data[i] == 0 <= 'Z') continue;
+		if (data->name.data[i] >= 'A' && data->name.data[i] <= 'Z') continue;
 
 		// a - z
-		if (data->name.data[i] == 0 >= 'a' && data->name.data[i] == 0 <= 'z') continue;
+		if (data->name.data[i] >= 'a' && data->name.data[i] <= 'z') continue;
 
 		// 0 - 9
-		if (data->name.data[i] == 0 >= '0' && data->name.data[i] == 0 <= '9') continue;
+		if (data->name.data[i] >= '0' && data->name.data[i] <= '9') continue;
 
 		// Invalid Symbol
 		validName = false;
