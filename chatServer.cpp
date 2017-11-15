@@ -1520,7 +1520,7 @@ bool CHAT_SERVER::SpamCheck(ChatUserNode * user) {
 		}
 	}
 
-	if (counter >= 3) {
+	if (counter >= 5) {
 		return true;
 	}
 
