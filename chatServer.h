@@ -191,6 +191,7 @@ class CHAT_SERVER {
 		void SendUserMessage(int* fd, char * message);
 		void SendGroupMessage(ChatUserNode * user, char * message);
 		void SendGlobalMessage(ChatUserNode * user, char * message);
+		bool SpamCheck(ChatUserNode * user);
 		bool ValidMac(SceNetEtherAddr * mac);
 		bool ValidLogin(SceNetAdhocctlLoginPacketC2S * data);
 		bool ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, ChatUserNode * user);

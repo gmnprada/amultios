@@ -21,6 +21,11 @@
 
 #include "chatServer.h"
 #include "socket.h"
+#include <vector>
+#include <string>
+
+std::vector<std::string> _SpamLog;
+
 //Identified group name on the lobby
 static const db_groupname default_groupname[] = {
 
@@ -894,6 +899,21 @@ void CHAT_SERVER::SendGlobalMessage(ChatUserNode * user, char * message) {
 	uint8_t * ip = (uint8_t *)&user->resolver.ip;
 	printf("CHAT_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) sent global chat %s \n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], message);
 
+	if (SpamCheck(user)) {
+		SceNetAdhocctlChatPacketS2C packet;
+		// Clear Memory
+		memset(&packet, 0, sizeof(packet));
+		SceNetAdhocctlNickname sname;
+		char system[9] = "Amultios";
+		memcpy(sname.data, system, sizeof(system));
+		// Set Chat Opcode
+		packet.name = sname;
+		packet.base.base.opcode = OPCODE_GLOBAL_CHAT;
+		strcpy(packet.base.message, "Ban Warning Don't Spam The Global Chat");
+		int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
+		return;
+	}
+
 	ChatUserNode * peer = _DbUser;
 	while (peer != NULL)
 	{
@@ -1480,6 +1500,37 @@ bool CHAT_SERVER::ValidGameProduct(SceNetAdhocctlProductCode * product) {
 * =======================================================================================
 */
 // update player status to external file
+
+bool CHAT_SERVER::SpamCheck(ChatUserNode * user) {
+	std::string name((char *)user->resolver.name.data);
+	_SpamLog.push_back(name);
+	int counter = 0;
+
+	// erase first element
+	if (_SpamLog.size() > 10) {
+		_SpamLog.erase(_SpamLog.begin());
+	}
+
+	for (auto i : _SpamLog) {
+		if (i == name) {
+			counter++;
+		}
+		else {
+			counter = 0;
+		}
+	}
+
+	if (counter >= 3) {
+		return true;
+	}
+
+	if (counter == 9) {
+		//prepare to ban
+		return true;
+	}
+	return false;
+}
+
 void CHAT_SERVER::UpdateServerStatus(void) {
 
 }
