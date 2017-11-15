@@ -31,7 +31,7 @@ void connectSQL() {
 		printf("MYSQL_SERVER [%s]: Failed to connect to database [%s] username [%s] password [%s]\n",DB_HOST, mysql_error(&_CON), DB_USERNAME,DB_PASSWORD);
 	}
 	else {
-		my_bool reconnect = 1;
+		my_bool reconnect = 0;
 		mysql_options(&_CON, MYSQL_OPT_RECONNECT, &reconnect);
 		printf("MYSQL_SERVER [%s] : Connected to Database\n",DB_HOST);
 		connection = true;
@@ -66,7 +66,7 @@ void keepAliveThread() {
 			//reset the timer
 			begin_time = clock();
 
-			if (mysql_query(&_CON,"SELECT 1;")) {
+			if (mysql_ping(&_CON)) {
 				if (g_amultios) {
 					std::unique_lock<std::mutex> lock(sql_lock);
 					SQL::closeSQL();
