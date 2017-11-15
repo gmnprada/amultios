@@ -31,6 +31,8 @@ void connectSQL() {
 		printf("MYSQL_SERVER [%s]: Failed to connect to database [%s] username [%s] password [%s]\n",DB_HOST, mysql_error(&_CON), DB_USERNAME,DB_PASSWORD);
 	}
 	else {
+		my_bool reconnect = 1;
+		mysql_options(&_CON, MYSQL_OPT_RECONNECT, &reconnect);
 		printf("MYSQL_SERVER [%s] : Connected to Database\n",DB_HOST);
 		connection = true;
 		mysql_query(&_CON, "update users set online = 0 , server = null where 1;");
@@ -54,7 +56,7 @@ void closeSQL() {
 void keepAliveThread() {
 
 	float interval;
-	int one_hour = 3600;
+	int one_hour = 1800;
 	printf("MYSQL_SERVER [%s] : Starting Keep Alive Thread\n", DB_HOST);
 	while (g_amultios) {
 		//printf("MYSQL_SERVER Keep Alive Counting");
@@ -64,7 +66,7 @@ void keepAliveThread() {
 			//reset the timer
 			begin_time = clock();
 
-			if (mysql_query(&_CON,"SELECT 1;") !=0) {
+			if (mysql_query(&_CON,"SELECT 1;")) {
 				if (g_amultios) {
 					std::unique_lock<std::mutex> lock(sql_lock);
 					SQL::closeSQL();
@@ -76,7 +78,7 @@ void keepAliveThread() {
 				printf("MYSQL_SERVER [%s] : PING the database %.2f \n", DB_HOST, interval);
 			}
 		}
-		// count every 10 second
+		// check time every 10 second
 #ifdef _WIN32
 		Sleep(10 * 1000);
 #else
