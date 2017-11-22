@@ -1043,7 +1043,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 
 				if (row[0] != NULL && row[0][0] != '\0') {
 					strncpy(onlineChar, row[0], sizeof(int));
-					if (atoi(onlineChar) == DB_STATE_LOGEDIN || atoi(onlineChar) || DB_STATE_DISCONNECTED) {
+					if (atoi(onlineChar) == DB_STATE_LOGEDIN || atoi(onlineChar) == DB_STATE_DISCONNECTED) {
 						strcpy(onlinevalidation, "Join Adhoc Lobby Success");
 					}
 					else if(atoi(onlineChar) == DB_STATE_PLAYING) {
@@ -1074,23 +1074,24 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 			result = NULL;
 			row = NULL;
 		}
+		user->dbState = DB_STATE_LOGEDIN;
+		if (check) {
+			char update[100 + ADHOCCTL_NICKNAME_LEN];
+			snprintf(update, sizeof(update), "UPDATE users SET online = '2', server='%s' WHERE nickname='%s';", _serverName.c_str(), (char *)user->resolver.name.data);
+			if (mysql_query(&_CON, update)) {
+				printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
+				strcpy(message, "Login Failed Lost Connection to database report to admin");
+				check = false;
+			}
+			else {
+				user->dbState = DB_STATE_PLAYING;
+				strcpy(message, "Join Adhoc lobby Success");
+				printf("CTL_SERVER [%s] Nickname %s Successfuly pass Amultios Login\n", _serverName.c_str(), nameval);
+			}
+		}
 	}
 
-	user->dbState = DB_STATE_LOGEDIN;
-	if (check) {
-		char update[100 + ADHOCCTL_NICKNAME_LEN];
-		snprintf(update, sizeof(update), "UPDATE users SET online = '2', server='%s' WHERE nickname='%s';", _serverName.c_str(), (char *)user->resolver.name.data);
-		if (mysql_query(&_CON, update)) {
-			printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
-			strcpy(message, "Login Failed Lost Connection to database report to admin");
-			check = false;
-		}
-		else {
-			user->dbState = DB_STATE_PLAYING;
-			strcpy(message, "Join Adhoc lobby Success");
-			printf("CTL_SERVER [%s] Nickname %s Successfuly pass Amultios Login\n", _serverName.c_str(), nameval);
-		}
-	}
+
 	return check;
 }
 /** =====================================================================================

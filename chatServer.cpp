@@ -1157,7 +1157,6 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 		}
 	}
 
-
 	return check;
 }
 /** =====================================================================================
