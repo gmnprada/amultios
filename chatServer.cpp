@@ -1139,7 +1139,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 
 		if (check) {
 			char update[100 + ADHOCCTL_NICKNAME_LEN];
-			snprintf(update, sizeof(update), "UPDATE users SET online = '1', server='%s' WHERE nickname='%s';", _serverName.c_str(), (char *)user->resolver.name.data);
+			snprintf(update, sizeof(update), "UPDATE users SET online = '1', server='%s' WHERE nickname='%s';", _serverName.c_str(), nameval);
 			if (mysql_query(&_CON, update)) {
 				printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
 				strcpy(message, "Login Failed Lost Connection to database report to admin");
