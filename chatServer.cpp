@@ -1068,7 +1068,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 		std::unique_lock<std::mutex> lock(sql_lock);
 		char nickname[ADHOCCTL_NICKNAME_LEN + 100];
 		memset(nickname, 0, sizeof(nickname));
-		snprintf(nickname, sizeof(nickname), "SELECT pin,role FROM users WHERE nickname='%s' LIMIT 1;", nameval);
+		snprintf(nickname, sizeof(nickname), "SELECT pin,role,online FROM users WHERE nickname='%s' LIMIT 1;", nameval);
 
 		if (mysql_query(&_CON, nickname)) {
 			printf("CHAT_SERVER [%s][ERROR]Failed To select nickname on database Query[%s] id  Error: %s\n", _serverName.c_str(), nickname, mysql_error(&_CON));
@@ -1124,6 +1124,17 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 				}
 				else {
 					strcpy(message, "Login Failed cannot validate account retry again later");
+					check = false;
+				}
+
+				if (row[2] != NULL && row[2][0] != '\0') {
+					if (atoi(row[2]) == DB_STATE_PLAYING) {
+						check = false;
+						strcpy(message, "Login Failed Double Login, Logout your game first");
+					}
+				}
+				else {
+					strcpy(message, "Login Failed cannot validate account state retry again later");
 					check = false;
 				}
 			}
