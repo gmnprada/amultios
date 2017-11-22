@@ -77,6 +77,7 @@ typedef struct SceNetAdhocctlUserNode {
 
 	// TCP Socket
 	int stream;
+	uint8_t dbState;
 
 	// Last Ping Update
 	time_t last_recv;
@@ -129,62 +130,3 @@ struct SceNetAdhocctlGroupNode {
 	// Double-Linked Player List
 	SceNetAdhocctlUserNode * player;
 };
-
-/*
-namespace CTL {
-
-	// server running status
-	extern bool _ServerRunning;
-
-	// total player count on the server
-	extern uint32_t _DbUserCount;
-
-	// User Database Double Linked
-	extern SceNetAdhocctlUserNode * _DbUser;
-
-	// Game Database Double Linked
-	extern SceNetAdhocctlGameNode * _DbGame;
-	extern std::string serverName;
-	extern std::vector<db_groupname> groupids;
-	// Threading and Entry Point
-	int ServerThread(int port, const char* name);
-	int MainLoop(int port);
-	void PopulateGameDatabase(void);
-
-	void ProcessWaitingUser(SceNetAdhocctlUserNode * user);
-	void ProcessLogedInUser(SceNetAdhocctlUserNode * user);
-
-	// TCP Stream Handle
-	void LoginTcpStream(int fd, uint32_t ip, uint16_t port);
-	bool GetUniqueStream(SceNetAdhocctlUserNode * user,uint32_t ip, uint16_t port);
-	int GetUserState(SceNetAdhocctlUserNode * user);
-	void ClearRxBuf(SceNetAdhocctlUserNode * user, int clear);
-	void FreeDbUser(void);
-
-	// User Database Manipulation
-	void LoginUser(SceNetAdhocctlUserNode * user, SceNetAdhocctlLoginPacketC2S * data);
-	void LoginAmultiosUser(SceNetAdhocctlUserNode * user, SceNetAdhocctlLoginPacketAmultiosC2S * data);
-	void SendUserMessage(int* fd, char * message);
-	void SendGlobalMessage(char * message);
-	void LogoutUser(SceNetAdhocctlUserNode * user);
-	bool ValidMac(SceNetEtherAddr * mac);
-	bool ValidLogin(SceNetAdhocctlLoginPacketC2S * data);
-	bool ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,char * message, uint8_t * role);
-
-	// User Adhoc Group Manipulation
-	void ConnectUserGroup(SceNetAdhocctlUserNode * user, SceNetAdhocctlGroupName * group);
-	void DisconnectUserGroup(SceNetAdhocctlUserNode * user);
-	void SendScanGroupResult(SceNetAdhocctlUserNode * user);
-	bool ValidGroupName(SceNetAdhocctlGroupName * group);
-
-	// Game Database Manipulation
-	void GameProductLink(SceNetAdhocctlProductCode * product);
-	bool ValidGameProduct(SceNetAdhocctlProductCode * product);
-
-	// Server External File Status Manipulation
-	void UpdateServerStatus(void);
-	FILE *OpenCFile(const std::string &filename, const char *mode);
-}
-
-extern bool ctlServerRunning;
-*/

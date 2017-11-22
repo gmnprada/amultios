@@ -212,7 +212,6 @@ void CHAT_SERVER::PopulateGameDatabase(void) {
 // main loop that handle incoming tcp connection
 int CHAT_SERVER::MainLoop(int server) {
 
-	UpdateServerStatus();
 	while (_serverRunning && g_amultios) {
 		// Login Block
 		{
@@ -593,9 +592,6 @@ void CHAT_SERVER::LoginTcpStream(int fd, uint32_t ip, uint16_t port) {
 
 				// Fix User Counter
 				_DbUserCount++;
-
-				// Update Status Log
-				UpdateServerStatus();
 				// Exit Function
 				return;
 			}
@@ -717,16 +713,6 @@ void CHAT_SERVER::LoginChatUser(ChatUserNode * user, ChatLoginPacketC2S * data) 
 		// Set Chat Message
 		strcpy(packet.reason, message);
 		int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
-		// Update online status on mysql DB
-		{
-			std::unique_lock<std::mutex> lock(sql_lock);
-			char update[100 + ADHOCCTL_NICKNAME_LEN];
-			snprintf(update, sizeof(update), "UPDATE users SET online = '1', server='%s' WHERE nickname='%s';", _serverName.c_str(), (char *)user->resolver.name.data);
-			if (mysql_query(&_CON, update)) {
-				printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
-				strcpy(message, "Login Failed Lost Connection to database report to admin");
-			}
-		}
 		if (iResult < 0) printf("CHAT_SERVER [%s][ERROR] send sucess packet  (Socket error %d) \n", _serverName.c_str(), errno);
 		return;
 	}
@@ -798,9 +784,6 @@ void CHAT_SERVER::ConnectUserGame(ChatUserNode * user, ChatConnectGamePacketC2S 
 			memset(safegamestr, 0, sizeof(safegamestr));
 			strncpy(safegamestr, game->game.data, PRODUCT_CODE_LENGTH);
 			printf("CHAT_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) joined Game Lobby %s\n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr);
-
-			// Update Status Log
-			UpdateServerStatus();
 
 			// Leave Function
 			return;
@@ -961,6 +944,7 @@ void CHAT_SERVER::LogoutUser(ChatUserNode * user) {
 	// Close Stream
 	closesocket(user->stream);
 	
+	if(user->dbState == DB_STATE_LOGEDIN)
 	{
 		std::unique_lock<std::mutex> lock(sql_lock);
 		char update[100 + ADHOCCTL_NICKNAME_LEN];
@@ -1013,9 +997,6 @@ void CHAT_SERVER::LogoutUser(ChatUserNode * user) {
 
 	// Fix User Counter
 	_DbUserCount--;
-
-	// Update Status Log
-	UpdateServerStatus();
 }
 
 bool CHAT_SERVER::ValidMac(SceNetEtherAddr * mac) {
@@ -1066,26 +1047,28 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 	}
 
 	if (data->name.data[0] == 0 || data->pin[0] == 0) {
-		strcpy(message, "Login Failed NICKNAME or PIN is empty, set crendential nickname on network settings");
+		strcpy(message, "Login Failed NICKNAME or PIN is empty set on network settings");
 		return false;
 	}
 
 	if (strcmp(nameval, "PPSSPP") == 0) {
-		strcpy(message, "Login Failed using default PPSSPP name, set crendential nickname on network settings");
+		strcpy(message, "Login Failed using default PPSSPP nickname");
 		return false;
 	}
 
 	if (strcmp(nameval, "AMULTIOS") == 0) {
-		strcpy(message, "Login Failed using default AMULTIOS name, set crendential nickname on network settings");
+		strcpy(message, "Login Failed using default AMULTIOS nickname");
 		return false;
 	}
 
+
+	user->dbState = DB_STATE_DISCONNECTED;
 	bool check = true;
 	{
 		std::unique_lock<std::mutex> lock(sql_lock);
 		char nickname[ADHOCCTL_NICKNAME_LEN + 100];
 		memset(nickname, 0, sizeof(nickname));
-		snprintf(nickname, sizeof(nickname), "SELECT pin,online,role FROM users WHERE nickname='%s' LIMIT 1;", nameval);
+		snprintf(nickname, sizeof(nickname), "SELECT pin,role FROM users WHERE nickname='%s' LIMIT 1;", nameval);
 
 		if (mysql_query(&_CON, nickname)) {
 			printf("CHAT_SERVER [%s][ERROR]Failed To select nickname on database Query[%s] id  Error: %s\n", _serverName.c_str(), nickname, mysql_error(&_CON));
@@ -1098,21 +1081,18 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 
 			if (row == NULL) {
 				printf("CHAT_SERVER [%s] Failed login attemp nickname not found %s \n", _serverName.c_str(), nameval);
-				strcpy(message, "Login Failed Nickname Not Found did you already register on amultios.net?");
+				strcpy(message, "Login Failed Nickname not found on amultios.net");
 				check = false;
 			}
 			else if(result!=NULL && row != NULL){
 
 				char pinvalidaton[30];
-				char onlinevalidation[30];
 				char safepin[7];
 				char safepindb[7];
-				char onlineChar[sizeof(int)+1];
 				char roleChar[sizeof(int)+1];
 
 				memset(safepin, 0, sizeof(safepin));
 				memset(safepindb, 0, sizeof(safepindb));
-				memset(onlineChar, 0, sizeof(int));
 				memset(roleChar, 0, sizeof(int));
 
 				if (row[0] != NULL && row[0][0] != '\0') {
@@ -1126,57 +1106,52 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 						strcpy(message, "Invalid PIN , did you set your pin in network settings?");
 						check = false;
 					}
-					printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
+					printf("CHAT_SERVER [%s] $s Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(),nameval, safepin, safepindb, pinvalidaton);
 				}
 				else {
-					strcpy(message, "Server Still busy retry Login again later");
+					strcpy(message, "Login Failed cannot validate pin retry again later ");
 					check = false;
 				}
 
-				if(row[1] != NULL && row[1][0] != '\0'){
-					strncpy(onlineChar, row[1], sizeof(int));
-
-					if (atoi(onlineChar) == 1) {
-						strcpy(onlinevalidation, "Login Failed");
-						strcpy(message, "Double Login Detected try restarting somone may use your account");
-						//check = false;
-					}
-					else {
-						strcpy(onlinevalidation, "Login Success");
-						strcpy(message, "Login Success");
-					}
-
-					printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(onlineChar), onlinevalidation);
-				}
-				else {
-					strcpy(message, "Server Still busy retry Login again later");
-					check = false;
-				}
-
-				if (user != NULL && row[2] != NULL && row[2][0] != '\0') {
-					strncpy(roleChar, row[2], sizeof(int));
+				if (user != NULL && row[1] != NULL && row[1][0] != '\0') {
+					strncpy(roleChar, row[1], sizeof(int));
 					user->role = atoi(roleChar);
 					if (atoi(roleChar) > 2) {
 						check = false;
 						strcpy(message, "Your Account got Banned Stop Cheating Noob!");
 					}
-					printf("CHAT_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(roleChar), user->role);
+					printf("CHAT_SERVER [%s] %s Validate role db=[%d] role=[%u]\n",_serverName.c_str(), nameval, atoi(roleChar), user->role);
 				}
 				else {
-					strcpy(message, "Server Still busy retry Login again later");
+					strcpy(message, "Login Failed cannot validate account retry again later");
 					check = false;
 				}
 			}
 			else {
-				strcpy(message, "Server Still busy retry Login again later");
+				strcpy(message, "Login Failed Database Busy retry again later");
 				check = false;
 			}
 
 			mysql_free_result(result);
+			result = NULL;
+			row = NULL;
+		}
+
+		if (check) {
+			char update[100 + ADHOCCTL_NICKNAME_LEN];
+			snprintf(update, sizeof(update), "UPDATE users SET online = '1', server='%s' WHERE nickname='%s';", _serverName.c_str(), (char *)user->resolver.name.data);
+			if (mysql_query(&_CON, update)) {
+				printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
+				strcpy(message, "Login Failed Lost Connection to database report to admin");
+				check = false;
+			}
+			else {
+				user->dbState = DB_STATE_LOGEDIN;
+				printf("CHAT_SERVER [%s] Nickname %s Successfuly pass Amultios Login\n", _serverName.c_str(), nameval);
+			}
 		}
 	}
 
-	if (check) printf("CHAT_SERVER [%s] Nickname %s Successfuly pass Amultios Login\n", _serverName.c_str(), nameval);
 
 	return check;
 }
@@ -1262,9 +1237,6 @@ void CHAT_SERVER::ConnectUserGroup(ChatUserNode * user, ChatGroupName * group) {
 				memset(safegroupstr, 0, sizeof(safegroupstr));
 				strncpy(safegroupstr, (char *)user->group->group.data, CHAT_GROUPNAME_LENGTH);
 				printf("CHAT_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) joined %s group %s\n", _serverName.c_str(), (char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr, safegroupstr);
-
-				// Update Status Log
-				UpdateServerStatus();
 
 				// Exit Function
 				return;
@@ -1354,9 +1326,6 @@ void CHAT_SERVER::DisconnectUserGroup(ChatUserNode * user) {
 		user->group = NULL;
 		user->group_next = NULL;
 		user->group_prev = NULL;
-
-		// Update Status Log
-		UpdateServerStatus();
 
 		// Exit Function
 		return;
@@ -1529,10 +1498,6 @@ bool CHAT_SERVER::SpamCheck(ChatUserNode * user) {
 		return true;
 	}
 	return false;
-}
-
-void CHAT_SERVER::UpdateServerStatus(void) {
-
 }
 
 void CHAT_SERVER::Stop_Thread(void) {

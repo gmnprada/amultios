@@ -789,17 +789,6 @@ void CTL_SERVER::LoginAmultiosUser(SceNetAdhocctlUserNode * user, SceNetAdhocctl
 			strncpy(safegamestr, game->game.data, PRODUCT_CODE_LENGTH);
 			printf("CTL_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) started playing %s\n", _serverName.c_str(),(char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr);
 
-			// Update online status on mysql DB
-			{
-				std::unique_lock<std::mutex> lock(sql_lock);
-				char update[100 + ADHOCCTL_NICKNAME_LEN];
-				snprintf(update, sizeof(update), "UPDATE users SET online = '2', server='%s' WHERE nickname='%s';", _serverName.c_str(),(char *)user->resolver.name.data);
-				if (mysql_query(&_CON, update)) {
-					printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
-					strcpy(message, "Login Failed Lost Connection to database report to admin");
-				}
-			}
-
 			// Update Status Log
 			UpdateServerStatus();
 
@@ -927,6 +916,18 @@ void CTL_SERVER::LogoutUser(SceNetAdhocctlUserNode * user) {
 	// Close Stream
 	closesocket(user->stream);
 
+	// Disconnect on MYSQL DB
+	if(user->dbState == DB_STATE_PLAYING)
+	{
+		std::unique_lock<std::mutex> lock(sql_lock);
+		char update[100 + ADHOCCTL_NICKNAME_LEN];
+		snprintf(update, sizeof(update), "UPDATE users SET online = 1, server='Amultios' WHERE nickname='%s';", (char *)user->resolver.name.data);
+		if (mysql_query(&_CON, update)) {
+			printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
+		}
+		user->dbState = DB_STATE_LOGEDIN;
+	}
+
 	// Playing User
 	if (user->game != NULL)
 	{
@@ -936,17 +937,6 @@ void CTL_SERVER::LogoutUser(SceNetAdhocctlUserNode * user) {
 		memset(safegamestr, 0, sizeof(safegamestr));
 		strncpy(safegamestr, user->game->game.data, PRODUCT_CODE_LENGTH);
 		printf("CTL_SERVER [%s] %s (MAC: %02X:%02X:%02X:%02X:%02X:%02X - IP: %u.%u.%u.%u) stopped playing %s\n",  _serverName.c_str(),(char *)user->resolver.name.data, user->resolver.mac.data[0], user->resolver.mac.data[1], user->resolver.mac.data[2], user->resolver.mac.data[3], user->resolver.mac.data[4], user->resolver.mac.data[5], ip[0], ip[1], ip[2], ip[3], safegamestr);
-
-		// Disconnect on MYSQL DB
-		
-		{
-			std::unique_lock<std::mutex> lock(sql_lock);
-			char update[100 + ADHOCCTL_NICKNAME_LEN];
-			snprintf(update, sizeof(update), "UPDATE users SET online = 1, server='Amultios' WHERE nickname='%s';", (char *)user->resolver.name.data);
-			if (mysql_query(&_CON, update)) {
-				printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
-			}
-		}
 
 		// Fix Game Player Count
 		user->game->playercount--;
@@ -1022,31 +1012,17 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 		return false;
 	}
 
-	if (data->name.data[0] == 0 || data->pin[0] == 0) {
-		strcpy(message, "Login Failed NICKNAME or PIN is empty, did you set it on settings?");
-		return false;
-	}
-
-	if (strcmp(nameval, "PPSSPP") == 0) {
-		strcpy(message, "Login Failed using default PPSSPP name, did you set it on settings?");
-		return false;
-	}
-
-	if (strcmp(nameval, "AMULTIOS") == 0) {
-		strcpy(message, "Login Failed using default AMULTIOS name, did you set it on settings?");
-		return false;
-	}
 
 	bool check = true;
 	{
 		std::unique_lock<std::mutex> lock(sql_lock);
-		char nickname[ADHOCCTL_NICKNAME_LEN + 100];
+		char nickname[ADHOCCTL_NICKNAME_LEN + 60];
 		memset(nickname, 0, sizeof(nickname));
-		snprintf(nickname, sizeof(nickname), "SELECT pin,online,role FROM users WHERE nickname='%s' LIMIT 1;", nameval);
+		snprintf(nickname, sizeof(nickname), "SELECT online FROM users WHERE nickname='%s' LIMIT 1;", nameval);
 
 		if (mysql_query(&_CON, nickname)) {
 			printf("CTL_SERVER [%s][ERROR]Failed To select nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), nickname, mysql_errno(&_CON));
-			strcpy(message, "Login Failed Invalid Input Character For Nickname");
+			strcpy(message, "Login Failed Database Connection Lost");
 			check = false;
 		}
 		else {
@@ -1055,85 +1031,65 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 
 			if (row == NULL) {
 				printf("CTL_SERVER [%s] Failed login attemp nickname not found %s \n", _serverName.c_str(), nameval);
-				strcpy(message, "Login Failed Nickname Not Found did you already register?");
+				strcpy(message, "Login Failed Nickname Not Found on amultios.net");
 				check = false;
 			}
 			else if(result!=NULL && row !=NULL) {
 
-				char pinvalidaton[30];
 				char onlinevalidation[30];
-				char safepin[7];
-				char safepindb[7];
 				char onlineChar[sizeof(int) + 1];
-				char roleChar[sizeof(int) + 1];
 
-				memset(onlineChar, 0, sizeof(int));
-				memset(roleChar, 0, sizeof(int));
-				memset(safepin, 0, sizeof(safepin));
-				memset(safepindb, 0, sizeof(safepindb));
+				memset(onlineChar, 0, sizeof(int));;
 
 				if (row[0] != NULL && row[0][0] != '\0') {
-					strncpy(safepin, data->pin, PIN_LENGTH);
-					strncpy(safepindb, row[0], PIN_LENGTH);
-					if (IsMatch(safepin, safepindb)) {
-						strcpy(pinvalidaton, "pin valid");
+					strncpy(onlineChar, row[0], sizeof(int));
+					if (atoi(onlineChar) == DB_STATE_LOGEDIN) {
+						strcpy(onlinevalidation, "Join Adhoc Lobby Success");
 					}
-					else {
-						strcpy(pinvalidaton, "pin invalid");
-						strcpy(message, "Invalid PIN , did you set your pin in network settings?");
-						check = false;
-					}
-					printf("CHAT_SERVER [%s] Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(), safepin, safepindb, pinvalidaton);
-				}
-				else {
-					strcpy(message, "Server Still busy retry Login again later");
-					check = false;
-				}
-
-				if (row[1] != NULL && row[1][0] != '\0') {
-					strncpy(onlineChar, row[1], sizeof(int));
-					if (atoi(onlineChar) == 2) {
-						strcpy(onlinevalidation, "Login Failed");
-						strcpy(message, "Login Failed Someone Already Joined with this nickname");
+					else if(atoi(onlineChar) == DB_STATE_PLAYING) {
+						strcpy(onlinevalidation, "Duplicate Adhoc Login");
+						strcpy(message, "Double login detected restart your game");
 						check = false;
 					}
 					else {
-						strcpy(onlinevalidation, "Login Success");
-					}
-
-					printf("CHAT_SERVER [%s] Validate online %d result [%s]\n", _serverName.c_str(), atoi(onlineChar), onlinevalidation);
-				}
-				else {
-					strcpy(message, "Server Still busy retry Login again later");
-					check = false;
-				}
-
-				if (user != NULL && row[2] != NULL && row[2][0] != '\0') {
-					strncpy(roleChar, row[2], sizeof(int));
-					user->role = atoi(roleChar);
-					if (atoi(roleChar) > 2) {
+						strcpy(onlinevalidation, "Uknown Login State");
+						strcpy(message, "Disconnected from amultios network restart your game");
 						check = false;
-						strcpy(message, "Your Account got Banned Stop Cheating Noob!");
 					}
-					printf("CTL_SERVER [%s] Validate role db=[%d] role=[%u]\n", _serverName.c_str(), atoi(roleChar), user->role);
+
+					printf("CHAT_SERVER [%s] %s Validate online %d result [%s]\n", _serverName.c_str(), nameval,atoi(onlineChar), onlinevalidation);
 				}
 				else {
-					strcpy(message, "Server Still busy retry Login again later");
+					strcpy(message, "Disconnected from amultios network restart your game");
 					check = false;
 				}
 
 			}
 			else {
-				strcpy(message, "Server Still busy retry Login again later");
+				strcpy(message, "Join lobby Failed Database busy retry again later");
 				check = false;
 			}
 
 			mysql_free_result(result);
+			result = NULL;
+			row = NULL;
 		}
 	}
 
-	if (check) printf("CTL_SERVER [%s] Nickname %s Successfuly pass Amultios Login\n", _serverName.c_str(), nameval);
-
+	user->dbState = DB_STATE_LOGEDIN;
+	if (check) {
+		char update[100 + ADHOCCTL_NICKNAME_LEN];
+		snprintf(update, sizeof(update), "UPDATE users SET online = '2', server='%s' WHERE nickname='%s';", _serverName.c_str(), (char *)user->resolver.name.data);
+		if (mysql_query(&_CON, update)) {
+			printf("CTL_SERVER [%s][ERROR] Failed To update online status nickname on database Query[%s] id  Error: %u\n", _serverName.c_str(), update, mysql_errno(&_CON));
+			strcpy(message, "Login Failed Lost Connection to database report to admin");
+			check = false;
+		}
+		else {
+			user->dbState = DB_STATE_PLAYING;
+			printf("CTL_SERVER [%s] Nickname %s Successfuly pass Amultios Login\n", _serverName.c_str(), nameval);
+		}
+	}
 	return check;
 }
 /** =====================================================================================

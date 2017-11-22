@@ -24,6 +24,11 @@
 #include <vector>
 #include "sceNetAdhocCtlServer.h"
 #include "sql.h"
+
+#define DB_STATE_DISCONNECTED 0
+#define DB_STATE_LOGEDIN 1
+#define DB_STATE_PLAYING 2
+
 FILE *OpenCFile(const std::string &filename, const char *mode);
 
 class CTL_SERVER {

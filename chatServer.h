@@ -100,6 +100,7 @@ typedef struct ChatUserNode {
 
 	// Server Info
 	char server[SERVER_NAME_LENGTH];
+	uint8_t dbState;
 
 	// Last Ping Update
 	time_t last_recv;
@@ -205,7 +206,4 @@ class CHAT_SERVER {
 		// Game Database Manipulation
 		void GameProductLink(SceNetAdhocctlProductCode * product);
 		bool ValidGameProduct(SceNetAdhocctlProductCode * product);
-
-		// Server External File Status Manipulation
-		void UpdateServerStatus(void);
 };
