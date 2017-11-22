@@ -1106,7 +1106,7 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 						strcpy(message, "Invalid PIN , did you set your pin in network settings?");
 						check = false;
 					}
-					printf("CHAT_SERVER [%s] $s Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(),nameval, safepin, safepindb, pinvalidaton);
+					printf("CHAT_SERVER [%s] %s Validate pin %s && db pin %s result [%s]\n", _serverName.c_str(),nameval, safepin, safepindb, pinvalidaton);
 				}
 				else {
 					strcpy(message, "Login Failed cannot validate pin retry again later ");
@@ -1147,6 +1147,11 @@ bool CHAT_SERVER::ValidAmultiosLogin(ChatLoginPacketC2S * data, char * message, 
 			}
 			else {
 				user->dbState = DB_STATE_LOGEDIN;
+				std::string msg;
+				msg.append("Login Success [");
+				msg.append(std::string(nameval).substr(0, 32));
+				msg.append("]");
+				strcpy(message,msg.c_str());
 				printf("CHAT_SERVER [%s] Nickname %s Successfuly pass Amultios Login\n", _serverName.c_str(), nameval);
 			}
 		}

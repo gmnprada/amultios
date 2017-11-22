@@ -779,7 +779,7 @@ void CTL_SERVER::LoginAmultiosUser(SceNetAdhocctlUserNode * user, SceNetAdhocctl
 			memset(&packet, 0, sizeof(packet));
 			packet.base.opcode = OPCODE_AMULTIOS_LOGIN_SUCCESS;
 			// Set Chat Message
-			strcpy(packet.reason, "Login Success");
+			strcpy(packet.reason, message);
 			int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
 			if (iResult < 0) printf("CTL_SERVER [%s][ERROR] send sucess packet  (Socket error %d) \n", _serverName.c_str(),errno);
 			// Notify User
@@ -1043,7 +1043,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 
 				if (row[0] != NULL && row[0][0] != '\0') {
 					strncpy(onlineChar, row[0], sizeof(int));
-					if (atoi(onlineChar) == DB_STATE_LOGEDIN) {
+					if (atoi(onlineChar) == DB_STATE_LOGEDIN || atoi(onlineChar) || DB_STATE_DISCONNECTED) {
 						strcpy(onlinevalidation, "Join Adhoc Lobby Success");
 					}
 					else if(atoi(onlineChar) == DB_STATE_PLAYING) {
@@ -1066,7 +1066,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 
 			}
 			else {
-				strcpy(message, "Join lobby Failed Database busy retry again later");
+				strcpy(message, "Join Adhoc lobby Failed Database busy retry again later");
 				check = false;
 			}
 
@@ -1087,6 +1087,7 @@ bool CTL_SERVER::ValidAmultiosLogin(SceNetAdhocctlLoginPacketAmultiosC2S * data,
 		}
 		else {
 			user->dbState = DB_STATE_PLAYING;
+			strcpy(message, "Join Adhoc lobby Success");
 			printf("CTL_SERVER [%s] Nickname %s Successfuly pass Amultios Login\n", _serverName.c_str(), nameval);
 		}
 	}
