@@ -715,17 +715,17 @@ void CHAT_SERVER::LoginChatUser(ChatUserNode * user, ChatLoginPacketC2S * data) 
 		int iResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
 		if (iResult < 0) printf("CHAT_SERVER [%s][ERROR] send sucess packet  (Socket error %d) \n", _serverName.c_str(), errno);
 
-		SceNetAdhocctlChatPacketS2C packet;
+		SceNetAdhocctlChatPacketS2C cpacket;
 		// Clear Memory
-		memset(&packet, 0, sizeof(packet));
+		memset(&cpacket, 0, sizeof(cpacket));
 		SceNetAdhocctlNickname sname;
 		char system[9] = "Amultios";
 		memcpy(sname.data, system, sizeof(system));
 		// Set Chat Opcode
-		packet.name = sname;
-		packet.base.base.opcode = OPCODE_GLOBAL_CHAT;
-		strcpy(packet.base.message, "New Version Released Amultios 1.5.4 Beta 5 VPN");
-		int cResult = send(user->stream, (const char*)&packet, sizeof(packet), 0);
+		cpacket.name = sname;
+		cpacket.base.base.opcode = OPCODE_GLOBAL_CHAT;
+		strcpy(cpacket.base.message, "New Version Released Amultios 1.5.4 Beta 5 VPN");
+		int cResult = send(user->stream, (const char*)&cpacket, sizeof(cpacket), 0);
 		return;
 	}
 
