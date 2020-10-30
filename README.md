@@ -1,4 +1,4 @@
-# amultios
+# AMULTIOS
 
 Adhoc Multi Player Online System
 - an adhoc into single port one port is enough to fight shit address translation
