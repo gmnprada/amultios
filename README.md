@@ -1,7 +1,7 @@
 # amultios
 
 Adhoc Multi Player Online System
-- an adhoc into single port one port is enought to fight shit address translation
+- an adhoc into single port one port is enough to fight shit address translation
 
 A Multi Operation System
 - A Massive Network for your happyness sharing with everyone around the world
