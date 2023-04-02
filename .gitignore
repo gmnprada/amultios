@@ -23,3 +23,7 @@ Debug
 Release
 windows/*
 amultios.dir
+/target
+.DS_Store
+.gitignore
+Cargo.lock
