@@ -16,14 +16,14 @@ as i now designing the Emulator and Protocol from scratch with this project star
 
 ```
 - Respect Each Amultios Member Beta Tester or Developer
-- Build Based on Happiness from community to community
+- Build Based on Happiness from community to community , and Open To Collaborate
 - Noob Friendly (Easy To Use)
 - Fast And Performant 
 - No Cheat and Save States Play The PSP Game how it should that why i build it on RUST for Memory Safety
 - Focus on Adhoc Multiplayer Games
 - Keep On The Community Rules and Guidelines No Place for Piracy Dump Your Own Games.
 - Only Target Most Device available in Market (Android , Windows , Linux , Osx)
-- Gather The Docs Based On Real PSP Device Reverse Engineering Project or things that accurate on information to distract from bias on unknown information
+- Gather The Docs Based On Real PSP Device Reverse Engineering Project or things that accurate on information to distract from bias on unknown information and fragmentation
 - Target PSP architecture if we can , if not just skip it
 - Easy To Build and Maintain
 ```
