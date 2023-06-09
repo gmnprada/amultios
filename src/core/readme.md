@@ -1,1 +1,1 @@
-# We Intercept it on Hardware Layer in this directory so emulate all that chips and bus!
+# We Intercept it on Hardware Layer in this directory so emulate all that chips, cpu , memory , wlan , sound , and bus!
