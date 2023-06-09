@@ -19,6 +19,7 @@
 *.exp
 *.qdact
 *.json
+*.S
 Debug
 Release
 windows/*

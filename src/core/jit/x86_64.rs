@@ -1,4 +1,3 @@
-mod MipsR4000Instruction;
 use dynasmrt::{DynasmApi, x64::Assembler};
 
 fn translate_add(assembler: &mut Assembler, rd: u8, rs: u8, rt: u8) {
@@ -13,6 +12,5 @@ fn translate_addi(assembler:&mut Assembler,)
 fn translate_mips_instruction(assembler: &mut Assembler, instruction: MipsInstruction) {
     match instruction {
         MipsInstruction::Add(rd, rs, rt) => translate_add(assembler, rd, rs, rt),
-        // Handle other MIPS instructions...
     }
 }

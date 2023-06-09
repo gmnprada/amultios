@@ -1,5 +1,5 @@
 
-// simulate virtual PSP CPU Register
+// simulate virtual PSP CPU Register on software emulation LLE ways
 struct CpuGpr {
     zero : u32,  /* Wired Zero      $0 */      
     at   : u32,  /* Assembler Temp  $1 */

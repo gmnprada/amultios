@@ -177,7 +177,7 @@ enum AllegrexInstruction {
     WSBW
 }
 
-// map to lookup table OPCODE_TABLE[0,0] for fast access
+// map to lookup table OPCODE_TABLE[0,0] for fast access in logging
 // example const val :string = OPCODE_TABLE[0][0];
 // how to access the opcode by parsing high and low bit on INSTRUCTION Table
 // OPCODE_TABLE[high_idx][low_indx] on first 6 bit to decimal;
