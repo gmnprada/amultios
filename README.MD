@@ -37,3 +37,7 @@ Documents PSP Hardware From Various Source
 
 ### Hope This Project is usefull for your learning purpose like how i study much from PSP Custom Firmware source code
 
+
+### Current Project Status
+- Working on it in a Free Time after work hork hours.
+
