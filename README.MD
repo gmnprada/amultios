@@ -33,8 +33,5 @@ Most Of Api Calls of PSP already Documented on rust-psp just need an high level 
 
 - need to simulate hardware on LLE also for better accuracy on HOW PSP Emulated in Host Machine.
 - Documents PSP Hardware From Various Source
-- Hope This Project is usefull for your learning purpose like how i study much from PSP Custom Firmware source code
 
-### Current Project Status
-- Working on it in a Free Time after work hours.
-
+Nop! 
