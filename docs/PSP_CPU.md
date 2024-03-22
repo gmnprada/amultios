@@ -64,5 +64,3 @@ These instructions operate on registers, which are 32-bit storage locations that
 # PSP CPU Known as Tachyon
 
 Mips Instruction Set is Based on Mips I Mips 2 Instruction Set With Allegrex Instruction 
-
-

@@ -86,7 +86,7 @@ enum MipsInstruction {
 }
 
 bitflags! {
-    //  Flags Static Value Mips Instruction Header 000000 6 bits length
+    //  Flags Static Value Mips Instruction Header 000000  bits length
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
     struct MipsInstructionOp: u32 {
         // Bits Mask Value Of Op    OP         Syntax
@@ -124,6 +124,7 @@ bitflags! {
         const ERET    = 0b010000;
         const J       = 0b000010;
         const JAL     = 0b000011;
+        // NOT Possible on jump and links on 6 bits pattern
         const JALR    = 0b000000;
         const JR      = 0b000000;
         const LB      =         ;
@@ -135,25 +136,24 @@ bitflags! {
     }
 }
 
-
 // Special Psp Allegrex Instruction TM
 // I = Independent Instruction , D = Data
 enum AllegrexInstruction {
     BITREV, // Bit Reverse
-    CACHE,  // Index Invalidate (I)
-    CACHE,  // Index Unlock (I)
-    CACHE,  // Hit Invalidate (I)
-    CACHE,  // Fill (I)
-    CACHE,  // Fill With Lock (I)
-    CACHE,  // Index Write Back Invalidate (D)
-    CACHE,  // Index Unlock (D)
-    CACHE,  // Create Dirty Exclusive (D)
-    CACHE,  // Hit Invalidate (D)
-    CACHE,  // Hit Write Back (D)
-    CACHE,  // Hit Write Back Invalidate (D)
-    CACHE,  // Create Dirty Exclusive with Lock (D)
-    CACHE,  // Fill (D)
-    CACHE,  // Fill With Lock (D)
+    CACHE_INDEX_INVALIDATE,  // Index Invalidate (I)
+    CACHE_INDEX_UNLOCK,  // Index Unlock (I)
+    CACHE_HIT_INVALIDATE,  // Hit Invalidate (I)
+    CACHE_FILL,  // Fill (I)
+    CACHE_FILL_WITH_LOCK,  // Fill With Lock (I)
+    CACHE_INDEX_WRITE_BACK,  // Index Write Back Invalidate (D)
+    CACHE_INDEX_UNLOCK,  // Index Unlock (D)
+    CACHE_CREATE_DIRTY_EXCLUSIVE,  // Create Dirty Exclusive (D)
+    CACHE_HIT_INVALIDATE,  // Hit Invalidate (D)
+    CACHE_HIT_WRITE_BACK,  // Hit Write Back (D)
+    CACHE_HIT_WRITE_BACK_INVALIDATE,  // Hit Write Back Invalidate (D)
+    CACHE_CREATE_DIRTY_EXCLUSIVE_WITH_LOCK,  // Create Dirty Exclusive with Lock (D)
+    CACHE_FILL,  // Fill (D)
+    CACHE_FILL_WITH_LOCK,  // Fill With Lock (D)
     CLO,    // Count Leading One
     CLZ,    // Count Leading Zero
     EXT,    // Extract Bit Field
@@ -176,17 +176,3 @@ enum AllegrexInstruction {
     WSBH,
     WSBW
 }
-
-// map to lookup table OPCODE_TABLE[0,0] for fast access in logging
-// example const val :string = OPCODE_TABLE[0][0];
-// how to access the opcode by parsing high and low bit on INSTRUCTION Table
-// OPCODE_TABLE[high_idx][low_indx] on first 6 bit to decimal;
-const OPCODE_TABLE : vec![vec![0; 7]; 7] = 
-[
-    ["SPECIAL","REGIMM","J","JAL","BEQ","BNE","BLEZ","BGTZ"],
-    ["ADDI","ADDIU","SLTI","SLTIU","ANDI","ORI","XORI","LUI"],
-    ["COP0","COP1","COP2","COP3","BEQL","BNEL","BLEZL","BGTZL"],
-    ["VFPU0","VFPU1","*","VFPU3","SPECIAL2","*","*","SPECIAL3"],
-    ["LB","LH","LWL","LW",]
-];
-

@@ -13,3 +13,8 @@ path = "src/main.rs"
 [dependencies]
 bitflags = "1.2.1"
 
+[profile.dev]
+panic = "abort"
+
+[profile.release]
+panic = "abort"
