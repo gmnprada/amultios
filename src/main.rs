@@ -1,5 +1,5 @@
-use amultios::run2;
+#![no_std]
 
-fn main() {
-    run2();
+fn main(){
+
 }
