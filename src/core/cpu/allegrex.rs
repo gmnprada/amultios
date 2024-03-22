@@ -122,10 +122,10 @@ bitflags! {
         const DIV     = 0b000011;
         const DIVU    = 0b000011;
         const ERET    = 0b010000;
-        const J       =         ;
-        const JAL     =         ;
-        const JALR    =         ;
-        const JR      =         ;
+        const J       = 0b000010;
+        const JAL     = 0b000011;
+        const JALR    = 0b000000;
+        const JR      = 0b000000;
         const LB      =         ;
         const LBU     =         ;
         const LH      =         ;
