@@ -88,7 +88,7 @@ enum MipsInstruction {
 bitflags! {
     //  Flags Static Value Mips Instruction Header 000000 6 bits length
     #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
-    struct MipsInstructionOp: u8 {
+    struct MipsInstructionOp: u32 {
         // Bits Mask Value Of Op    OP         Syntax
         const ADD     = 0b000000;   // add     rd,rs,rt
         const ADDI    = 0b001000;   // addi    rt,rs,immediate

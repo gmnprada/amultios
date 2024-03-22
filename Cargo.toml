@@ -4,31 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["bin"]
 
 [[bin]]
 name = "amultios"
 path = "src/main.rs"
 
 [dependencies]
-cfg-if = "1"
-libc= "0.2.2"
-env_logger = "0.10"
-bytesize = "1.1.0"
 bitflags = "1.2.1"
-winit = "0.28.3"
-wgpu = "0.15.1"
-pnet = "0.33.0"
-pollster = "0.3.0"
 
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-console_error_panic_hook = "0.1.6"
-console_log = "0.2.0"
-wgpu = { version = "0.15", features = ["webgl"]}
-wasm-bindgen = "=0.2.84"
-wasm-bindgen-futures = "0.4.30"
-web-sys = { version = "0.3.53", features = [
-    "Document",
-    "Window",
-    "Element",
-]}
